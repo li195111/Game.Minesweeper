@@ -1,6 +1,8 @@
 document.addEventListener('DOMContentLoaded', ()=>{
     // 'use strict'
     const grid = document.querySelector('.grid');
+    const restart = document.querySelector('.restart');
+    const modal = document.querySelector('.modal');
 
     let width = 10;
     let bombAmount = 20;
@@ -16,23 +18,35 @@ document.addEventListener('DOMContentLoaded', ()=>{
         const emptyArray = Array(width*width - bombAmount).fill('valid');
         const gameArray = emptyArray.concat(bombsArray);
         const shuffledArray = gameArray.sort(()=>Math.random() - 0.5);
-
+        
         for(let i=0; i < width*width; i++){
+            const squareBox = document.createElement('div');
             const square = document.createElement('div');
-            square.setAttribute('id',i);
-            square.classList.add(shuffledArray[i]);
-            grid.appendChild(square);
-            squares.push(square);
+            const squareSallow = document.createElement('div');
+
+            squareBox.setAttribute('id',i);
+            squareBox.classList.add(shuffledArray[i]);
+            squareBox.classList.add('squareBox');
+            
+            square.classList.add('square');
+
+            squareSallow.classList.add('squareShallow');
+
+            squareBox.appendChild(square);
+            squareBox.appendChild(squareSallow);
+
+            grid.appendChild(squareBox);
+            squares.push(squareBox);
 
             // normal click
-            square.addEventListener('click', function(e){
-                click(square);
+            squareBox.addEventListener('click', function(e){
+                click(squareBox);
             })
 
             // cntrl and left click
-            square.oncontextmenu = function(e){
+            squareBox.oncontextmenu = function(e){
                 e.preventDefault();
-                addFlag(square);
+                addFlag(squareBox);
             }
         }
 
@@ -82,6 +96,24 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
     createBoard();
 
+    restart.addEventListener('click',()=>{
+        squares.map(square => {
+            grid.removeChild(square);
+        });
+        squares =[];
+        createBoard();
+        isGameOver = false;
+        if (modal.classList.contains('active')){
+            modal.classList.remove('active');
+        }
+    });
+    restart.addEventListener('mousedown',()=>{
+        restart.classList.add('restart-click');
+    })
+    restart.addEventListener('mouseup',()=>{
+        restart.classList.remove('restart-click');
+    })
+
     // add Flag with right click
     function addFlag(square){
         if (isGameOver) {return;}
@@ -108,18 +140,19 @@ document.addEventListener('DOMContentLoaded', ()=>{
             gameOver(square);
         }else{
             let total = square.getAttribute('data');
-            if (total !== "0"){
+            if (total != 0){
                 square.classList.add('checked');
                 square.innerHTML = total;
                 return;
             }
-            checkSquare(square, currentId);
+            checkSquare(currentId);
+            square.innerHTML = '';
         }
         square.classList.add('checked');
     }
 
     // check neoighboring squares once square is checked
-    function checkSquare(square, currentId){
+    function checkSquare(currentId){
         const isLeftEdge = (currentId % width === 0);
         const isRightEdge = (currentId % width === width-1);
         setTimeout(()=>{
@@ -168,7 +201,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
     // Game Over
     function gameOver(square){
-        console.log('BOOM! Game Over!');
+        if (!modal.classList.contains('active')){
+            modal.classList.add('active');
+        }
         isGameOver = true;
 
         // show All the bombs
@@ -178,7 +213,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
             }
         })
     }
-
 
     // check for win
     function checkForWin(){
