@@ -54,10 +54,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
             })
 
             // cntrl and left click
-            squareBox.oncontextmenu = function(e){
+            squareBox.addEventListener('contextmenu',(e)=>{
                 e.preventDefault();
                 addFlag(squareBox);
-            }
+            })
         }
 
         // add numbers
