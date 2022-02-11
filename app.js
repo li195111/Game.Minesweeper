@@ -1,14 +1,24 @@
 document.addEventListener('DOMContentLoaded', ()=>{
     // 'use strict'
     const grid = document.querySelector('.grid');
-    const restart = document.querySelector('.restart');
+    const restarts = document.querySelectorAll('.restart');
     const modal = document.querySelector('.modal');
+    const score_element = document.querySelector('.score');
+    const close_modal = document.querySelector('.close-modal');
 
     let width = 10;
     let bombAmount = 20;
     let flags = 0;
     let squares = [];
     let isGameOver = false;
+    let matches = [];
+    let score = 0;
+
+    close_modal.addEventListener('click',()=>{
+        if (modal.classList.contains('active')){
+            modal.classList.remove('active');
+        }
+    })
 
     // create board
     function createBoard(){
@@ -96,23 +106,25 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
     createBoard();
 
-    restart.addEventListener('click',()=>{
-        squares.map(square => {
-            grid.removeChild(square);
+    for(let restart of restarts){
+        restart.addEventListener('click',()=>{
+            squares.map(square => {
+                grid.removeChild(square);
+            });
+            squares =[];
+            createBoard();
+            isGameOver = false;
+            if (modal.classList.contains('active')){
+                modal.classList.remove('active');
+            }
         });
-        squares =[];
-        createBoard();
-        isGameOver = false;
-        if (modal.classList.contains('active')){
-            modal.classList.remove('active');
-        }
-    });
-    restart.addEventListener('mousedown',()=>{
-        restart.classList.add('restart-click');
-    })
-    restart.addEventListener('mouseup',()=>{
-        restart.classList.remove('restart-click');
-    })
+        restart.addEventListener('mousedown',()=>{
+            restart.classList.add('restart-click');
+        })
+        restart.addEventListener('mouseup',()=>{
+            restart.classList.remove('restart-click');
+        })
+    }
 
     // add Flag with right click
     function addFlag(square){
@@ -120,12 +132,12 @@ document.addEventListener('DOMContentLoaded', ()=>{
         if (!square.classList.contains('checked') && (flags < bombAmount)){
             if (!square.classList.contains('flag')){
                 square.classList.add('flag');
-                square.innerHTML = '🚩';
+                square.querySelector('.square').innerHTML += '🚩';
                 flags++;
                 checkForWin();
             }else{
                 square.classList.remove('flag');
-                square.innerHTML = '';
+                square.querySelector('.square').innerHTML = '';
                 flags--;
             }
         }
@@ -201,30 +213,42 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
     // Game Over
     function gameOver(square){
+        score = matches.reduce((p,c)=>p+c);
+        score_element.innerHTML = `${score}/${bombAmount}`;
         if (!modal.classList.contains('active')){
             modal.classList.add('active');
         }
+        
         isGameOver = true;
 
         // show All the bombs
         squares.forEach(square=>{
             if (square.classList.contains('bomb')){
-                square.innerHTML = '💣'
+                if (square.classList.contains('flag')){
+                    square.querySelector('.square').style.backgroundColor = 'green';
+                }
+                else{
+                    square.innerHTML = '💣'
+                }
             }
         })
     }
 
     // check for win
     function checkForWin(){
-        let matches = 0;
         for (let i = 0; i<squares.length; i++){
             if (squares[i].classList.contains('flag') && squares[i].classList.contains('bomb')){
-                matches++;
+                matches[i] = 1;
+            }
+            else{
+                matches[i] = 0;
             }
             if (matches === bombAmount){
                 console.log('YOU WIN!');
                 isGameOver = true;
             }
         }
+        score = matches.reduce((p,c)=>p+c);
+        score_element.innerHTML = `${score}/${bombAmount}`;
     }
 })
