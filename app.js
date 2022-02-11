@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     let flags = 0;
     let squares = [];
     let isGameOver = false;
-    let matches = [];
+    let matches = Array(width*width).fill(0);
     let score = 0;
 
     close_modal.addEventListener('click',()=>{
